@@ -2,14 +2,13 @@ from rest_framework import serializers
 from market_app.models import Market, Seller, Product
 
 
-
 class MarketSerializer(serializers.ModelSerializer):    
 
     sellers = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
 
     class Meta:
         model = Market
-        fields = ['id', 'sellers', 'name', 'location', 'description', 'net_worth']
+        fields = '__all__'
 
     def validate_name(self, value):
         errors = []
@@ -23,6 +22,26 @@ class MarketSerializer(serializers.ModelSerializer):
         if errors:
              raise serializers.ValidationError(errors)
         return value
+    
+class MarketHyperlinkedSerializer(MarketSerializer, serializers.HyperlinkedModelSerializer):    
+
+    def __init__(self, *args, **kwargs):
+        # Don't pass the 'fields' arg up to the superclass
+        fields = kwargs.pop('fields', None)
+
+        # Instantiate the superclass normally
+        super().__init__(*args, **kwargs)
+
+        if fields is not None:
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+    class Meta:
+        model = Market
+        fields =  ['id','url','name','location','description','net_worth','sellers']
 
 
 class SellerSerializer(serializers.ModelSerializer):
