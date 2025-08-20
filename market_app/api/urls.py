@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import markets_view, market_single_view, sellers_view, product_view,sellers_single_view, MarketsView, SellersView
+from .views import MarketsView, SellersView, SellerDetailView, ProductListView, MarketDetailView
 
 urlpatterns = [
     path('market/',MarketsView.as_view()),
-    path('market/<int:pk>', market_single_view, name ="market-detail"),
+    path('market/<int:pk>', MarketDetailView.as_view(), name ="market-detail"),
     path('seller/', SellersView.as_view()),
-    path('product/', product_view),
-    path('seller/<int:pk>', sellers_single_view, name='seller_single')
+    path('product/', ProductListView.as_view()),
+    path('seller/<int:pk>', SellerDetailView.as_view(), name='seller_single')
 ]
