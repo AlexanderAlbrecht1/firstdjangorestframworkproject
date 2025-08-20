@@ -60,7 +60,20 @@ def market_single_view(request, pk):
             return Response(serializer.data)
         else: 
             return Response(serializer.errors)     
-            
+
+
+class SellersView(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 @api_view(['GET','POST'])
 def sellers_view(request):
