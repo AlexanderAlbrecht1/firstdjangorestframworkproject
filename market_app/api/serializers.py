@@ -63,40 +63,41 @@ class SellerSerializer(serializers.ModelSerializer):
         return obj.markets.count()
     
      
-class ProductDetailSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=255)
-    description = serializers.CharField()
-    price = serializers.DecimalField(max_digits=50, decimal_places=2)
-    market = serializers.StringRelatedField(many=True)
-    seller = serializers.StringRelatedField(many=True)
-
-
-class ProductCreateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
-    description = serializers.CharField()
-    price = serializers.DecimalField(max_digits=50, decimal_places=2)
-    market = serializers.ListField(child=serializers.IntegerField(), write_only=True)
-    seller = serializers.ListField(child=serializers.IntegerField(), write_only=True)
-
-    def validate_markets(self, value):
-        market = Market.objects.filter(id__in = value)
-        if len(market) != len(value):
-            raise serializers.ValidationError("market id not found")
-        return value
+class ProductDetailSerializer(serializers.ModelSerializer):
     
-    def validate_seller(self, value):
-        seller = Seller.objects.filter(id__in = value)
-        if len(seller) != len(value):
-            raise serializers.ValidationError("market id not found")
-        return value
+    seller = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
+    market = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='market-detail')
 
-    def create(self, validated_data):
-         market_ids = validated_data.pop('market')
-         seller_ids = validated_data.pop('seller')
-         market = Market.objects.filter(id__in = market_ids)
-         seller = Seller.objects.filter(id__in = seller_ids)
-         product = Product.objects.create(**validated_data)
-         product.market.set(market)
-         product.seller.set(seller)
-         return product
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+# class ProductCreateSerializer(serializers.Serializer):
+#     name = serializers.CharField(max_length=255)
+#     description = serializers.CharField()
+#     price = serializers.DecimalField(max_digits=50, decimal_places=2)
+#     market = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+#     seller = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+
+#     def validate_markets(self, value):
+#         market = Market.objects.filter(id__in = value)
+#         if len(market) != len(value):
+#             raise serializers.ValidationError("market id not found")
+#         return value
+    
+#     def validate_seller(self, value):
+#         seller = Seller.objects.filter(id__in = value)
+#         if len(seller) != len(value):
+#             raise serializers.ValidationError("market id not found")
+#         return value
+
+#     def create(self, validated_data):
+#          market_ids = validated_data.pop('market')
+#          seller_ids = validated_data.pop('seller')
+#          market = Market.objects.filter(id__in = market_ids)
+#          seller = Seller.objects.filter(id__in = seller_ids)
+#          product = Product.objects.create(**validated_data)
+#          product.market.set(market)
+#          product.seller.set(seller)
+#          return product
