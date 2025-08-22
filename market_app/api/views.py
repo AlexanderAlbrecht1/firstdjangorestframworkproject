@@ -7,18 +7,16 @@ from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
 
-class MarketsView(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+class MarketsView(generics.ListCreateAPIView):
     
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    #     return self.list(request, *args, **kwargs)
     
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     return self.create(request, *args, **kwargs)
 
 @api_view(['GET','POST'])
 def markets_view(request):
@@ -61,21 +59,18 @@ def market_single_view(request, pk):
         else: 
             return Response(serializer.errors) 
 
-class MarketDetailView(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+class MarketDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    #     return self.retrieve(request, *args, **kwargs)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    # def put(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)    
+    # def delete(self, request, *args, **kwargs):
+    #     return self.destroy(request, *args, **kwargs)    
 
 
 
