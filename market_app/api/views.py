@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import MarketSerializer, SellerSerializer, ProductDetailSerializer, MarketHyperlinkedSerializer
+from .serializers import MarketSerializer, SellerSerializer, ProductDetailSerializer, MarketHyperlinkedSerializer, SellerListSerializer
 from market_app.models import Market, Seller, Product
 from rest_framework.views import APIView
 from rest_framework import mixins
@@ -158,7 +158,24 @@ class SellerDetailView(mixins.RetrieveModelMixin,
         
 @api_view()
 def sellers_single_view(request,pk):
+
     if request.method == 'GET':
         seller = Seller.objects.get(pk=pk)
         serializer = SellerSerializer(seller, context={'request': request})
         return Response(serializer.data)
+    
+
+class SellerOfMarketList(generics.ListCreateAPIView):
+    serializer_class = SellerListSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        market = Market.objects.get(pk=pk)
+        return market.sellers.all()
+    
+    def perform_create(self, serializer):
+        pk = self.kwargs.get('pk')
+        market = Market.objects.get(pk=pk)
+        serializer.save(markets=[market])
+
+

@@ -73,31 +73,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class ProductCreateSerializer(serializers.Serializer):
-#     name = serializers.CharField(max_length=255)
-#     description = serializers.CharField()
-#     price = serializers.DecimalField(max_digits=50, decimal_places=2)
-#     market = serializers.ListField(child=serializers.IntegerField(), write_only=True)
-#     seller = serializers.ListField(child=serializers.IntegerField(), write_only=True)
-
-#     def validate_markets(self, value):
-#         market = Market.objects.filter(id__in = value)
-#         if len(market) != len(value):
-#             raise serializers.ValidationError("market id not found")
-#         return value
-    
-#     def validate_seller(self, value):
-#         seller = Seller.objects.filter(id__in = value)
-#         if len(seller) != len(value):
-#             raise serializers.ValidationError("market id not found")
-#         return value
-
-#     def create(self, validated_data):
-#          market_ids = validated_data.pop('market')
-#          seller_ids = validated_data.pop('seller')
-#          market = Market.objects.filter(id__in = market_ids)
-#          seller = Seller.objects.filter(id__in = seller_ids)
-#          product = Product.objects.create(**validated_data)
-#          product.market.set(market)
-#          product.seller.set(seller)
-#          return product
+class SellerListSerializer(SellerSerializer):
+        class Meta:
+            model = Seller
+            fields = ['id','name','market_ids','market_count','contact_info']
