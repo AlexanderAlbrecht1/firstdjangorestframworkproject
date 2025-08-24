@@ -1,22 +1,33 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import MarketSerializer, SellerSerializer, ProductDetailSerializer, MarketHyperlinkedSerializer, SellerListSerializer
+from .serializers import MarketSerializer, SellerSerializer, ProductSerializer, MarketHyperlinkedSerializer, SellerListSerializer
 from market_app.models import Market, Seller, Product
+
 from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
+from rest_framework import viewsets
+
+
+
+class ListRetrieveViewSet(mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          viewsets.GenericViewSet):
+    pass
+
+
+class ProductViewSet(ListRetrieveViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
 
 class MarketsView(generics.ListCreateAPIView):
     
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
 
-    # def get(self, request, *args, **kwargs):
-    #     return self.list(request, *args, **kwargs)
-    
-    # def post(self, request, *args, **kwargs):
-    #     return self.create(request, *args, **kwargs)
 
 @api_view(['GET','POST'])
 def markets_view(request):
@@ -112,11 +123,11 @@ def product_view(request):
 
     if request.method == 'GET':
         sellers = Product.objects.all()
-        serializer = ProductDetailSerializer(sellers, many=True, context={'request': request})
+        serializer = ProductSerializer(sellers, many=True, context={'request': request})
         return Response(serializer.data)
     
     if request.method == 'POST':
-        serializer = ProductDetailSerializer(data=request.data)
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -128,7 +139,7 @@ class ProductListView(mixins.ListModelMixin,
                   generics.GenericAPIView):
     
     queryset = Product.objects.all()
-    serializer_class = ProductDetailSerializer
+    serializer_class = ProductSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)

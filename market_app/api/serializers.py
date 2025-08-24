@@ -63,10 +63,10 @@ class SellerSerializer(serializers.ModelSerializer):
         return obj.markets.count()
     
      
-class ProductDetailSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     
-    seller = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
-    market = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='market-detail')
+    # seller = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
+    # market = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='market-detail')
 
     class Meta:
         model = Product
