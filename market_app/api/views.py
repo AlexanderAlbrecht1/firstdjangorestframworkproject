@@ -5,8 +5,7 @@ from rest_framework import status
 from .serializers import MarketSerializer, SellerSerializer, ProductSerializer, MarketHyperlinkedSerializer, SellerListSerializer, ManufacturerSerializer, ManufacturerUserSerializer
 from market_app.models import Market, Seller, Product, Manufacturer, ManufacturerUser
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-
-from rest_framework.views import APIView
+from .permissions import IsStaffOrReadOnly, IsAdminForDeleteOrPatchAndReadOnly, IsOwnerOrAdmin
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import viewsets
@@ -193,12 +192,13 @@ class SellerOfMarketList(generics.ListCreateAPIView):
 class ManufacturerList(generics.ListCreateAPIView):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
+    permission_classes = [IsStaffOrReadOnly]
     #permission_classes = [IsAuthenticated] #IsStaffOrReadOnly |    # später hinzufügen!
 
 class ManufacturerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
-    #permission_classes = [IsAdminForDeleteOrPatchAndReadOnly]      # später hinzufügen!
+    permission_classes = [IsAdminForDeleteOrPatchAndReadOnly]  
 
 
 class ProductList(generics.ListCreateAPIView):
@@ -218,7 +218,7 @@ class ManufacturerUserList(generics.ListCreateAPIView):
 class ManufacturerUserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ManufacturerUser.objects.all()
     serializer_class = ManufacturerUserSerializer
-    #permission_classes = [IsOwnerOrAdmin]                           # später hinzufügen!
+    permission_classes = [IsOwnerOrAdmin]                          
 
 
 class ManufacturerProductListCreate(generics.ListCreateAPIView):
