@@ -192,8 +192,8 @@ class SellerOfMarketList(generics.ListCreateAPIView):
 class ManufacturerList(generics.ListCreateAPIView):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
-    permission_classes = [IsStaffOrReadOnly]
-    #permission_classes = [IsAuthenticated] #IsStaffOrReadOnly |    # später hinzufügen!
+    # permission_classes = [IsStaffOrReadOnly]
+    permission_classes = [IsAuthenticated] #IsStaffOrReadOnly |    # später hinzufügen!
 
 class ManufacturerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Manufacturer.objects.all()

@@ -1,89 +1,41 @@
 from rest_framework import serializers
-from market_app.models import Manufacturer, ManufacturerUser, Market, Seller, Product
+from user_auth_app.models import UserProfile
+from django.contrib.auth.models import User
 
 
-class MarketSerializer(serializers.ModelSerializer):    
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'bio', 'location']
 
-    sellers = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
+
+class RegistrationSerializer(serializers.ModelSerializer):
+
+    repeated_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = Market
-        fields = '__all__'
+        model = User
+        fields = ['username', 'email', 'password', 'repeated_password']
+        extra_kwargs = {
+            'password': {
+                'write_only': True
+            }
+        }
 
-    def validate_name(self, value):
-        errors = []
+    def save(self):
+        pw = self.validated_data['password']
+        repeated_pw = self.validated_data['repeated_password']
+  
+        if pw != repeated_pw:
+            raise serializers.ValidationError(
+                {'error': 'wiederholung passt nicht'})
 
-        if "X" in value:
-            errors.append('Bitte kein Schweinskram')
-        if "Y" in value:
-            pass
-            errors.append('Bitte kein Schweinskram mit Y')
+        if User.objects.filter(email=self.validated_data['email']
+                               ).exists():
+            raise serializers.ValidationError('Email already exists')
 
-        if errors:
-             raise serializers.ValidationError(errors)
-        return value
-    
-class MarketHyperlinkedSerializer(MarketSerializer, serializers.HyperlinkedModelSerializer):    
-
-    def __init__(self, *args, **kwargs):
-        # Don't pass the 'fields' arg up to the superclass
-        fields = kwargs.pop('fields', None)
-
-        # Instantiate the superclass normally
-        super().__init__(*args, **kwargs)
-
-        if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument.
-            allowed = set(fields)
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
-
-    class Meta:
-        model = Market
-        fields =  ['id','url','name','location','description','net_worth','sellers']
-
-
-class SellerSerializer(serializers.ModelSerializer):
-    markets = MarketSerializer(read_only=True, many=True)
-    market_ids = serializers.PrimaryKeyRelatedField(
-        queryset = Market.objects.all(),
-        many = True,
-        write_only = True,
-        source = 'markets'
-    )
-
-    market_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Seller
-        fields = '__all__'
-
-    def get_market_count(self, obj):
-        return obj.markets.count()
-    
-     
-class ProductSerializer(serializers.ModelSerializer):
-    
-    # seller = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
-    # market = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='market-detail')
-
-    class Meta:
-        model = Product
-        fields = ['id', 'manufacturer', 'name', 'description', 'price']
-
-
-class SellerListSerializer(SellerSerializer):
-        class Meta:
-            model = Seller
-            fields = ['id','name','market_ids','market_count','contact_info']
-
-class ManufacturerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Manufacturer
-        fields = ['id', 'name', 'description', 'net_worth']
-
-class ManufacturerUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ManufacturerUser
-        fields = ['manufacturer', 'user', 'role', 'joined_date']
+        account = User(
+            email=self.validated_data['email'], username=self.validated_data['username'])
+        account.set_password(pw)
+        account.save()
+        return account
